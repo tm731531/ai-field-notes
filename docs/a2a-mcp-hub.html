@@ -1,0 +1,233 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>A2A、MCP、Hub 怎麼選:同一個 Agent 問資料,四個檔位的取捨</title>
+<style>*{margin:0;box-sizing:border-box}body{margin:0}.totop{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border-radius:999px;background:var(--accent,#0ea5e9);color:#04121f;border:none;cursor:pointer;font-size:1.5rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}.totop.show{opacity:.92;pointer-events:auto}html{scroll-behavior:smooth}</style>
+</head>
+<body>
+
+<style>
+  .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;
+        --accent:#0ea5e9;--eyebrow:#64748b;
+        max-width:920px;margin:0 auto;padding:0 20px 80px;
+        font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+        color:var(--text);line-height:1.7;}
+  @media (prefers-color-scheme:dark){.deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}}
+  :root[data-theme="dark"] .deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}
+  :root[data-theme="light"] .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;
+        --text:#0f172a;--muted:#64748b;--accent:#0ea5e9;--eyebrow:#64748b;}
+  .deck{background:var(--bg);}
+  body{background:var(--bg,#0b1120);}
+  .hero{padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:48px;}
+  .eyebrow{font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--eyebrow);font-weight:600;}
+  .hero h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:.4em 0 .3em;text-wrap:balance;font-weight:800;}
+  .lead{color:var(--muted);font-size:1.15rem;max-width:60ch;}
+  .badges{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 8px;align-items:center;}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
+        background:var(--surface);border:1px solid var(--line);font-size:.9rem;color:var(--muted);}
+  .yt{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;
+        background:var(--accent);color:#04121f;font-weight:700;text-decoration:none;font-size:.95rem;}
+  .yt:hover{filter:brightness(1.08);}
+  .slide{background:var(--surface);border:1px solid var(--line);border-radius:18px;
+        padding:32px 32px 8px;margin:22px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .shead{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;}
+  .snum{flex:0 0 auto;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+        font-weight:800;color:#04121f;font-size:1.1rem;}
+  .semoji{font-size:2rem;line-height:1;margin-left:auto;}
+  .shead h2{font-size:1.5rem;font-weight:800;margin:6px 0;line-height:1.25;text-wrap:balance;}
+  ul.cards{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:12px;}
+  ul.cards li{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:12px;
+        background:color-mix(in srgb,var(--accent) 7%,transparent);border-left:4px solid var(--accent);
+        font-size:1.05rem;}
+  ul.cards li .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+        font-size:.85rem;font-weight:700;color:#04121f;}
+  details.script{margin:4px 0 20px;border-top:1px dashed var(--line);padding-top:12px;}
+  details.script summary{cursor:pointer;color:var(--muted);font-size:.9rem;font-weight:600;
+        letter-spacing:.03em;list-style:none;}
+  details.script summary::before{content:"▸ ";}
+  details.script[open] summary::before{content:"▾ ";}
+  details.script p{color:var(--muted);margin:12px 0 4px;font-size:1rem;}
+  .note{display:inline-block;margin:0 0 20px;padding:8px 16px;border-radius:10px;
+        background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);
+        font-weight:600;font-size:.95rem;}
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;}
+  .foot a{color:var(--accent);}
+</style>
+
+<div class="deck">
+<header class="hero">
+<div class="eyebrow">AI 實戰筆記 · Context 治理</div>
+<h1>A2A、MCP、Hub 怎麼選</h1>
+<p class="lead">同一個 Agent 問資料,四個檔位的取捨</p>
+<div class="badges">
+<a class="yt" href="https://www.youtube.com/watch?v=uqUenTyfrS8" target="_blank" rel="noopener">▶ 看影片</a>
+<span class="pill" style="border-color:var(--accent);color:var(--accent);font-weight:700">🎓 Context 治理</span>
+<span class="pill">🎬 11 個段落</span>
+<span class="pill">🀄 投影片 + 逐字稿</span>
+</div>
+<details class="script" open><summary>本集開場</summary><p>假設你手上有**上百個老系統**,有的甚至跑了三十年,各自的資料庫、API、權限全都不一樣。現在你想讓 AI Agent 去問這些系統的資料 —— 問題來了:Agent 應該**直接打**,還是中間要墊幾層?很多人一聽到 A2A、MCP、Hub,就以為是三個要三選一的技術。**其實它們是同一件事、只是墊了不同層數的中介。**這一集,我用一條你其實很熟的老架構,把這三個名詞一次講到你不會再搞混,而且知道自己該用哪一個。</p></details>
+</header>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">1</div>
+<h2>不變的底層:一切都是「Agent 問資料」</h2>
+<div class="semoji">🧭</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>三個名詞,同一個動作</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>差別只在墊了幾層中介</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>每加一層:換直接 → 換治理</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>先記住一句話,後面全部串得起來:不管走哪一層,底層永遠是**同一件事** —— 讓一個 Agent 拿到後端的資料。A2A、MCP、Hub 看起來是三個東西,其實是同一個動作、中間墊了**不同層數的中介**。每多墊一層,你就用一點「直接跟速度」,去換一點「管理跟治理」。所以真正的問題從來不是「用哪個技術」,而是「這一次,我需要多少管理」。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">2</div>
+<h2>檔位零:裸接 —— 最快,也最裸</h2>
+<div class="semoji">🚀</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>Agent 直接打 API 或 DB</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>十個 Agent 打十個系統 = 一百條整合</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>沒授權、沒稽核,只適合一次性</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>**檔位零,裸接。**Agent 直接呼叫每個系統的 API 或資料庫。一個 Agent 打得動;但十個 Agent 打十個系統,就是**十乘十、一百條**整合。每個 Agent 要自己知道每個 API 長怎樣、自己帶授權、自己處理格式。改一個後端,全部要跟著改。它只適合一次性的探索,一上規模就崩。這就像把 SQL 直接寫進畫面 —— 能動,但撐不久。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">3</div>
+<h2>檔位一:A2A —— 包成會自我介紹的 agent</h2>
+<div class="semoji">🔌</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>帶一張 Agent Card,自我描述</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>一個 A2A 全體重用,打斷 N×M</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>本質是 Adapter 加 Repository</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>**檔位一,A2A。**把每個後端**包成一個會自我介紹的 Agent**,帶一張 Agent Card。Agent 問這張卡,就知道這個怎麼用,不用事先寫死。一個 A2A 給所有 Agent 重用,**N 乘 M 就被打斷了**,醜的老系統介面被藏在後面。用老話講,這就是 **Adapter 加 Repository** —— 轉接醜介面,給你一個乾淨的存取口。代價是:你多了一層要維護,而且授權還是各自管。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">4</div>
+<h2>檔位二:MCP —— 一個域的統一入口</h2>
+<div class="semoji">🧩</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>一組 A2A 收成統一工具面</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>Claude Code、Codex 插上就用</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>管理的「最小可行單位」</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>**檔位二,MCP server。**它把**一組 A2A 收成一個統一的工具面**,加上最低限度的發現、授權跟限流。而且 Claude Code、Codex 這些工具原生就吃 MCP,插上就能用。為什麼說「最少要 MCP」?因為讓幾百個 Agent 各自裸打 A2A,授權跟稽核根本**無處落地**;MCP 是管理的**最小可行單位**。代價是多一跳,而且 —— MCP 會長很多個,問題只是被推高了一層。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">5</div>
+<h2>檔位三:Hub —— 當 MCP 多到需要統籌</h2>
+<div class="semoji">🗼</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>單一入口、身分、policy、稽核</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>把橫切關注集中管</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>本質是 Front Controller</li>
+</ul>
+<div class="note">接續「把閘道當導向器」那一集 —— Hub 就是那顆無狀態閘道。</div>
+<details class="script"><summary>逐字稿</summary><p>**檔位三,Hub。**當 MCP 從一個變二十個,你需要一顆**統籌**:單一入口、單一身分、單一授權規則、單一稽核。把授權、記錄、限流這些**橫切的事**,從每個 MCP 裡抽出來集中管。決策者只連一個地方,就能跨所有系統;新增系統只是註冊,不是又開一個要各自顧的入口。這顆 Hub,用老話講就是 **Front Controller**,也就是我另一集講的那個**把閘道當導向器**的無狀態閘道。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">6</div>
+<h2>其實這就是 Agent 版的 MVC</h2>
+<div class="semoji">🏛️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>舊系統 / DB = Model</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>A2A = Controller</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>Hub = Front Controller</li>
+<li style="border-left-color:#a78bfa;background:color-mix(in srgb,#a78bfa 8%,transparent)"><span class="dot" style="background:#a78bfa">4</span>消費端 Agent = View</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>看到這裡你可能有既視感 —— 這不就是 **MVC** 嗎?沒錯,而且對得非常乾淨:舊系統的資料庫是 **Model**;A2A 是 **Controller**,負責轉接跟存取;Hub 是 **Front Controller**,單一入口集中管授權跟路由;消費端的 Agent 就是 **View**,把資料組成你要看的答案。當年我們從「把 SQL 寫進畫面」,走到 MVC、Front Controller、API Gateway;現在 Agent 存取資料,正在用新名字**重跑同一條路**。你不是在發明新東西,你是在看一集你其實看過的戲。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">7</div>
+<h2>現實不是乾淨金字塔:野蠻生長</h2>
+<div class="semoji">🌿</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>A2A 一個 DB 長 20~30 個</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>MCP 可能串 API、也可能收 A2A</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>Hub 常是長官一句話開的</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>但我得老實跟你講:上面那張乾淨的分層,是**心智模型**,不是現實。現實是**野蠻生長**——A2A 一個資料庫就長二三十個,真實數量是幾千;MCP 沒有固定形狀,可能串一堆 API、也可能收一堆 A2A;連 Hub 都常常是**某個長官一句話**,為了一個需求就開一顆。所以真實的圖,是一團會一直長、還混在一起的網。你攔不住這種生長,也別假裝它是金字塔。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">8</div>
+<h2>省工方法論:Hub 適應葉子</h2>
+<div class="semoji">🪶</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>工往 Hub 集中,葉子零改動</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>預設粗粒度,別逼老系統做 per-user</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>粒度 = 工,按系統挑</li>
+</ul>
+<div class="note">憑證放 Hub 出口注入;葉子用它本來的服務帳號,不知道 Hub 存在。</div>
+<details class="script"><summary>逐字稿</summary><p>那怎麼在這團野蠻生長裡省工?一句話:**讓 Hub 適應葉子,不是葉子適應 Hub。**陷阱是——為了讓 Hub 能治理,就去逼每個 A2A 宣告格式、接身分下傳,那不是省工,是把工攤給一百個葉子。反過來:**所有適配都吞進 Hub**,葉子維持它本來的樣子、用它本來的服務帳號、根本不知道 Hub 存在。而且**授權預設粗粒度**——Hub 只管誰能連哪個系統,絕不預設逼三十年老機做逐人授權;細粒度是例外,不是預設。你省的工,是不逼一百個葉子改;你付的,是預設粗粒度——**這是唯一誠實的省工法。**</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">9</div>
+<h2>什麼時候才該往上爬一層?</h2>
+<div class="semoji">🪜</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>同後端要給多個 Agent 用 → 包 A2A</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>一組 A2A 要統一入口授權 → 上 MCP</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>MCP 多到各自管失控 → 上 Hub</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>重點來了:往上爬是有觸發條件的,不是無腦往上。這裡有三個。**第一,**當同一個後端要給**多個 Agent** 用,就包成 A2A,停止 N 乘 M。**第二,**當一組 A2A 需要**統一入口跟最低授權**,就上 MCP。**第三,**當 MCP 多到各自管授權、稽核已經**失控**,才上 Hub 統籌。每一步,都是被「痛」推上去的,不是為了架構好看。沒有痛,就別爬。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">10</div>
+<h2>該停哪格:規模 × 必要性</h2>
+<div class="semoji">🎯</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>一次性探索 → 裸接</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>單一系統給 Agent → A2A</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>一個域要管理性 → MCP</li>
+<li style="border-left-color:#a78bfa;background:color-mix(in srgb,#a78bfa 8%,transparent)"><span class="dot" style="background:#a78bfa">4</span>集團級要治理 → Hub</li>
+</ul>
+<div class="note">規模到了還裸接=技術債;MCP 才一個就蓋 Hub=過度設計。</div>
+<details class="script"><summary>逐字稿</summary><p>所以該停哪一格?一句話:**規模乘以必要性。**一次性探索,裸接就好;單一系統給 Agent 用,做到 A2A;一個團隊要管理性,上 MCP;集團級、很多 MCP、要治理稽核,才需要 Hub。而且**越高不是越好**,兩個方向都會出事:規模到了還在裸接,是**技術債**,遲早爆;可是 MCP 才一個就急著蓋 Hub,是**過度設計**,那套控制面的維運成本,你養不回來。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">11</div>
+<h2>帶走一句話:分層是選擇,不是義務</h2>
+<div class="semoji">🧳</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>能直接打,不代表該直接打</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>問的不是能不能,是誰來收拾</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>分層是選擇,不是義務</li>
+</ul>
+<div class="note">就像你能 new 一個 Controller 直接問 DB —— 能動,規模化才知道痛。</div>
+<details class="script"><summary>逐字稿</summary><p>最後送你一句心法:**分層是選擇,不是義務。**你當然可以直接打 A2A —— 就像你當然可以**直接 new 一個 Controller 去問資料庫**,能動。問題從來不是「能不能」,而是規模化之後:誰管授權、誰查得到是誰動了資料、上百個系統乘上一堆 Agent 的 N 乘 M,誰來收拾。MCP 是最低限度的紀律,Hub 是當 MCP 多到需要統籌時,那顆你其實很熟的 Front Controller。下次要為 Agent 接資料,先問自己一句:**這一層,我真的需要嗎?**</p></details>
+</section>
+<footer class="foot">
+完整影片:<a href="https://www.youtube.com/watch?v=uqUenTyfrS8" target="_blank" rel="noopener">https://www.youtube.com/watch?v=uqUenTyfrS8</a><br>
+📚 <a href="index.html">回課綱總表 →</a><br>
+《AI 實戰筆記:一個人的實戰升級》— 教學用網頁投影片。
+</footer>
+</div>
+<button class="totop" onclick="window.scrollTo(0,0)" aria-label="回到最上面">↑</button>
+<script>addEventListener("scroll",function(){var b=document.querySelector(".totop");if(b)b.classList.toggle("show",scrollY>500)})</script>
+</body>
+</html>
+

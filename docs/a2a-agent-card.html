@@ -1,0 +1,323 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>系統不能重寫,所以掛一張卡:A2A 與 Agent Card 怎麼運作</title>
+<style>*{margin:0;box-sizing:border-box}body{margin:0}.totop{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border-radius:999px;background:var(--accent,#0ea5e9);color:#04121f;border:none;cursor:pointer;font-size:1.5rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}.totop.show{opacity:.92;pointer-events:auto}html{scroll-behavior:smooth}</style>
+</head>
+<body>
+
+<style>
+  .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;
+        --accent:#0ea5e9;--eyebrow:#64748b;
+        max-width:920px;margin:0 auto;padding:0 20px 80px;
+        font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+        color:var(--text);line-height:1.7;}
+  @media (prefers-color-scheme:dark){.deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}}
+  :root[data-theme="dark"] .deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}
+  :root[data-theme="light"] .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;
+        --text:#0f172a;--muted:#64748b;--accent:#0ea5e9;--eyebrow:#64748b;}
+  .deck{background:var(--bg);}
+  body{background:var(--bg,#0b1120);}
+  .hero{padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:48px;}
+  .eyebrow{font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--eyebrow);font-weight:600;}
+  .hero h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:.4em 0 .3em;text-wrap:balance;font-weight:800;}
+  .lead{color:var(--muted);font-size:1.15rem;max-width:60ch;}
+  .badges{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 8px;align-items:center;}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
+        background:var(--surface);border:1px solid var(--line);font-size:.9rem;color:var(--muted);}
+  .yt{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;
+        background:var(--accent);color:#04121f;font-weight:700;text-decoration:none;font-size:.95rem;}
+  .yt:hover{filter:brightness(1.08);}
+  .slide{background:var(--surface);border:1px solid var(--line);border-radius:18px;
+        padding:32px 32px 8px;margin:22px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .shead{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;}
+  .snum{flex:0 0 auto;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+        font-weight:800;color:#04121f;font-size:1.1rem;}
+  .semoji{font-size:2rem;line-height:1;margin-left:auto;}
+  .shead h2{font-size:1.5rem;font-weight:800;margin:6px 0;line-height:1.25;text-wrap:balance;}
+  ul.cards{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:12px;}
+  ul.cards li{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:12px;
+        background:color-mix(in srgb,var(--accent) 7%,transparent);border-left:4px solid var(--accent);
+        font-size:1.05rem;}
+  ul.cards li .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+        font-size:.85rem;font-weight:700;color:#04121f;}
+  details.script{margin:4px 0 20px;border-top:1px dashed var(--line);padding-top:12px;}
+  details.script summary{cursor:pointer;color:var(--muted);font-size:.9rem;font-weight:600;
+        letter-spacing:.03em;list-style:none;}
+  details.script summary::before{content:"▸ ";}
+  details.script[open] summary::before{content:"▾ ";}
+  details.script p{color:var(--muted);margin:12px 0 4px;font-size:1rem;}
+  .note{display:inline-block;margin:0 0 20px;padding:8px 16px;border-radius:10px;
+        background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);
+        font-weight:600;font-size:.95rem;}
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;}
+  .foot a{color:var(--accent);}
+</style>
+
+<div class="deck">
+<header class="hero">
+<div class="eyebrow">AI 實戰筆記 · Context 治理</div>
+<h1>系統不能重寫,所以掛一張卡</h1>
+<p class="lead">A2A 與 Agent Card 怎麼運作</p>
+<div class="badges">
+<a class="yt" href="https://www.youtube.com/watch?v=CiMTb-9U5p4" target="_blank" rel="noopener">▶ 看影片</a>
+<span class="pill" style="border-color:var(--accent);color:var(--accent);font-weight:700">🎓 Context 治理</span>
+<span class="pill">🎬 18 個段落</span>
+<span class="pill">🀄 投影片 + 逐字稿</span>
+</div>
+<details class="script" open><summary>本集開場</summary><p>先講一個企業裡的現實。你走進任何一家有規模的公司,都會看到一套跑了十年、十五年的系統 —— 可能是 ERP、可能是訂單系統。它很重要,重要到不能停;它也很老,老到沒有人敢大改。現在你要導入 AI,問題來了:你有辦法叫這家公司把那套系統整個重寫,變成 AI 友善的架構嗎?答案幾乎都是不會。就算真的要換,那也是三年五年的工程,不是你這一季導入 AI 的前提。接下來要講的,就是這個現實逼出來的一條路。</p></details>
+</header>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">1</div>
+<h2>企業的現實:那套系統動不了</h2>
+<div class="semoji">🏚️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>跑了十幾年,沒人敢大改</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>改壞了,整條營運就停了</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>當初根本不是為了 AI 設計的</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>為什麼動不了?三個原因。第一,那套系統跑了十幾年,當初寫的人可能早就離職了,沒人敢大改。第二,它撐著實際的營運,改壞一天,整條線就停一天,那個代價沒人扛得起。第三,它當初設計的時候,世界上根本還沒有 AI Agent 這種東西,所以它的介面完全不是為了給 Agent 用而長的。這不是技術債的問題,是現實 —— 而且幾乎每家公司都有這種系統。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">2</div>
+<h2>所以真正的問題是</h2>
+<div class="semoji">❓</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>不是「怎麼把系統改成 AI 的」</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>而是:碰不得的系統怎麼被 Agent 用</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>前提:一行都不能動它</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>所以問題要換個問法。不是「我們怎麼把系統改造成 AI 友善的」—— 那條路走不通;而是「在一行都不能動它的前提下,怎麼讓 Agent 用得到它」。你把問題換成這樣問,答案的方向就完全不一樣了:既然裡面不能改,那就從外面想辦法。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">3</div>
+<h2>答案:老系統不動,在它外面加一層</h2>
+<div class="semoji">🧱</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>在旁邊做一個新的小服務,對內呼叫老系統原有的介面</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>對外掛一張自我介紹卡,叫 Agent Card</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>不是省掉工 —— 是把工搬到動得起的地方</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>答案是:老系統不動,在它外面加一層。你在旁邊做一個新的小服務,對內它去呼叫老系統原本就有的介面,對外它掛一張自我介紹卡,說明這個系統是誰、會做哪些事、要怎麼呼叫它。這張卡叫 Agent Card。這裡我要講清楚,免得你低估工作量:**這一層是要寫的**,不是一份貼上去的檔案。卡只是門口的招牌,真正接電話的是招牌後面那個服務 —— 它要照規格處理任務、回報狀態、處理驗證 —— 這些有官方 SDK 幫你擋掉大部分,不用自己從頭刻。但關鍵差別在:這些工全部發生在老系統**外面**。老系統一行都不用改,改壞營運的風險是零。所以這個做法真正的價值不是省掉工,是把工從「動不得的地方」,搬到「動得起的地方」。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">4</div>
+<h2>卡裡面放什麼</h2>
+<div class="semoji">📇</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>我是誰:名稱、用途</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>我會什麼:白話描述 + 幾個實際例子</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>收得了什麼、回得出什麼格式</li>
+<li style="border-left-color:#a78bfa;background:color-mix(in srgb,#a78bfa 8%,transparent)"><span class="dot" style="background:#a78bfa">4</span>要什麼授權才能叫我做事</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>那張卡裡面放什麼?四件事。第一,我是誰 —— 名稱、這個服務是幹嘛的。第二,我會什麼 —— 我提供哪些能力,每一項用白話描述它能做什麼,再給幾個實際例子。第三,我收得了什麼格式、回得出什麼格式,是純文字、還是結構化資料、還是圖片。第四,要什麼授權 —— 憑什麼身分才能叫我做事。這張卡放在一個規格訂死的固定位置:你的網域底下,一個叫做 well-known 的標準路徑。就像每個網站的小圖示都放同一個地方一樣,別人不用問你,照這個路徑直接來讀就行。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">5</div>
+<h2>關鍵:這裡沒有格式檢查幫你擋錯</h2>
+<div class="semoji">✍️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>不是像寫 API 文件那樣定義嚴格欄位</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>是自然語言描述 + 範例 —— 規格刻意這樣設計</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>所以寫得含糊,對方會理解錯,而且不會報錯給你</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>這裡有一個很多人搞錯、但非常關鍵的地方。A2A 這張卡上寫能力,**不是**像寫 API 文件那樣定義嚴格的欄位格式,而是用自然語言描述,加上幾個範例。這是規格刻意的設計 —— 因為讀卡的是一個聽得懂話的 Agent,不是一支只認參數的程式。但這也代表:**沒有格式檢查幫你擋錯**。傳統的 API,你參數給錯,對方直接回你一個錯誤;這裡不會,對方讀不懂你的描述時,它會自己猜一個意思然後照做,而且猜錯了你不一定知道。所以靈魂就在:用白話把「我會什麼、什麼情況該找我、什麼情況別找我」寫到對方不用猜。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">6</div>
+<h2>放上去,不等於全世界找得到你</h2>
+<div class="semoji">🔎</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>放在標準路徑 = 知道你網域的人讀得到</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>要被找到:對方直接設定,或登錄到目錄</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>企業內部大多就是一份設定檔</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>還要提醒一件事,不然你會有錯誤期待。把卡放在那個標準路徑,是讓「已經知道你在哪」的人讀得到,不等於全世界的 Agent 會自動搜到你。真的要被找到,要嘛對方直接把你的網址設定進去,要嘛把你登錄到一個 Agent 目錄上。企業內部實務上大多是前者 —— 就一份設定檔,列出公司裡有哪幾張卡,誰可以用。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">7</div>
+<h2>這跟「自己開很多個 Agent」不一樣</h2>
+<div class="semoji">🚧</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>自己開的:全是你的分身,不用互相驗身分</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>這裡:對方不是你的,你改不動、也管不到它</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>所以才需要自我介紹、需要授權</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>這裡要跟另一件事切開,不然很容易搞混。你自己一次開很多個 Agent 分工、平行跑 —— 那些全部是你的分身,你開的、你的帳號、你的機器,不需要誰跟誰自我介紹,也不用驗身分。但這裡完全不同:對方不是你的。你改不動它,也管不到它,它甚至可能是另一家公司的系統。正因為對方是陌生的,才需要一張卡來自我介紹,也才需要授權關卡來決定「憑什麼讓你叫我做事」。這個差別,就是個人用法和企業用法的分界線。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">8</div>
+<h2>它的正式身分與治理</h2>
+<div class="semoji">🏛️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>A2A 全名 Agent2Agent</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>2025 年 6 月捐給 LF,中立治理</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>2026 年 4 月發布 1.0 正式版</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>講一下它的正式身分,這對企業特別重要。A2A 全名是 Agent2Agent,直譯就是代理對代理。它是 Google 在二〇二五年四月提出來的,同年六月就捐給了 Linux Foundation,交給中立的基金會治理,二〇二六年四月發布一點零正式版。為什麼要講這段?因為企業要押注一個協定,第一個問的就是「這誰家的東西、會不會哪天被收回去」。答案是:它已經不是某一家公司說了算的規格了。而且它也不是還在紙上的東西 —— 主流的雲端 Agent 平台都原生支援了,官方也有好幾種主要語言的 SDK,社群裡也已經有一批公司在正式環境用它。你要導的話,不是從零開始造輪子。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">9</div>
+<h2>它真正的設計出發點</h2>
+<div class="semoji">🎯</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>要解的是:互不相識的 Agent 怎麼合作</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>雙方都是黑盒子,誰也不攤開內部邏輯</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>老系統剛好是最極端的黑盒子 —— 所以最受惠</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>順帶講一下它真正的設計出發點,免得你誤會。A2A 當初要解的問題,不是老系統 —— 是**互不相識的 Agent 怎麼合作**。你的 Agent 跟別家公司的 Agent,用不同框架寫的、跑在不同雲上、屬於不同公司,誰都不會把自己的內部邏輯、記憶、私有工具攤給對方看。所以它的核心設計是:雙方都是黑盒子,但還是能合作 —— 我只告訴你我能做什麼,不告訴你我怎麼做的。那老系統為什麼特別受惠?因為老系統剛好就是最極端的黑盒子 —— 你連自己公司的那套都不敢打開看。一個為黑盒子設計的協定,用在自家最黑的那個盒子上,自然最順手。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">10</div>
+<h2>跟 MCP 的分工</h2>
+<div class="semoji">🔀</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>MCP 垂直:Agent 往下接工具、拿能力</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>A2A 是水平的:找旁邊的 Agent</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>但這不是硬界線 —— 看對面那個東西的性質</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>它常常會跟 MCP 一起被提到,兩者是互補不是競爭。分工很好記:MCP 是垂直的 —— Agent 往下接工具、資料,拿到能力;A2A 是水平的 —— Agent 往旁邊找另一個 Agent,把事情交辦出去。一個是拿工具,一個是找隊友。不過垂直水平只是好記,不是一條硬界線 —— 同一件事你兩邊都包得起來。真正的判準是對面那個東西的性質:如果它是一支叫了就回、規格明確、沒有自己想法的功能,那是工具,用 MCP;如果它會自己判斷、會回頭問你、會跑很久、甚至會拒絕你,那它是一個對象,不是一個函式,用 A2A。硬把後者壓成一個工具來呼叫,是實務上最常見的誤用。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">11</div>
+<h2>先分角色,再讀卡確認怎麼講話</h2>
+<div class="semoji">🎭</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>發起方:主動去交辦的那個</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>接收方:掛了 Agent Card、被交辦的那個</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>讀卡不只看它會什麼,還要看它支援哪種溝通方式</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>要談溝通之前,先分清楚角色。一次協作裡有兩個位置:發起方,是主動跑去交辦的那個;接收方,是對外掛了 Agent Card、被交辦的那個。同一個 Agent 在不同場合可能是不同角色。而且發起方讀那張卡,不只是看「對方會什麼」,還要看「對方怎麼跟我講話」—— 卡上會明寫它支不支援即時串流、支不支援做完主動回呼。你得先讀到這個,才知道下一步該用哪一種方式叫它。這個動作叫能力協商,是每一次協作的第一步。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">12</div>
+<h2>三種講話方式,加一個橫跨三者的機制</h2>
+<div class="semoji">💬</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>一次性:問一件事、拿一個答案</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>串流:邊做邊回報進度,連線維持著</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>推播回呼:跑很久的,做完主動打回來</li>
+<li style="border-left-color:#a78bfa;background:color-mix(in srgb,#a78bfa 8%,transparent)"><span class="dot" style="background:#a78bfa">4</span>多輪:資料不夠會回頭問你 —— 這是狀態,不是第四種</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>兩邊怎麼講話?規格定了三種傳輸方式,加上一個橫跨三者的機制。第一種最單純,一次性的請求跟回應:我問一件事、你給我一個答案,結束。第二種是串流:任務要做一陣子,連線維持著,對方邊做邊回報進度,你這邊即時看到。第三種是推播回呼:如果任務要跑幾十分鐘、甚至幾小時,連線根本撐不住,所以你先給對方一個回呼網址,它做完直接打回來通知你。這在企業場景很常見,不要用串流硬撐半小時,中間網路一抖就斷了。最後還有一個橫跨這三種的機制:多輪。這不是第四種傳輸方式,而是任務的一個**狀態** —— 對方發現資料不夠,可以把任務標成「需要補充輸入」,你帶著同一個任務編號回來補,它接著做下去,不用整件事重來。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">13</div>
+<h2>對方不一定會做:任務的四種結局</h2>
+<div class="semoji">⚠️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>完成 / 做到一半失敗 / 被取消 / 我拒絕接這個活</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>還有一種:先去驗身分再回來</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>跨公司交辦,分得出這幾種才好處理</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>還有一件事一定要講,因為跨組織交辦最現實的問題就是這個:對方不一定會做。A2A 把任務的結局定義得很清楚 —— 完成、做到一半失敗、被取消、還有一種是「我拒絕接這個活」。另外也可能是「你先去驗身分再回來」。這聽起來瑣碎,但跨公司交辦的時候,你最需要的就是分得出「它還在做」「它做壞了」跟「它根本不接」。這三種你要用完全不同的方式處理 —— 還在做的你要等,做壞了你要重試或換一家,不接的你重試幾次都沒用。A2A 幫你把這個區分寫進規格裡了,這是它比「隨便打個 API」強的地方。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">14</div>
+<h2>舉個例子:修車廠(上)</h2>
+<div class="semoji">🔧</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>客戶把車丟給「店長 Agent」交辦</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>店長找各「技師 Agent」多輪診斷</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>來回問診:哪裡怪、什麼聲音、什麼時候發生</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>用一個修車廠的例子,你一次就懂。客戶把車丟過來,交辦給店長 Agent:「我的車怪怪的,幫我看一下。」店長自己不修車,它去找各個技師 Agent。而且這種診斷沒辦法一次問完,所以會用到剛剛說的多輪:哪裡怪?什麼聲音?什麼時候會發生?冷車還是熱車?技師把任務標成「需要補充輸入」,店長補完,它接著往下查。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">15</div>
+<h2>舉個例子:修車廠(下)</h2>
+<div class="semoji">🔩</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>技師用 MCP 呼叫診斷儀、查維修手冊 —— 用工具</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>技師再用 A2A 找「零件供應商 Agent」—— 再交辦</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>而那個供應商,可能就是一套十幾年的庫存系統</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>接下來就看得出兩種協定的分工了。技師 Agent 要診斷,它去呼叫診斷儀、查維修手冊 —— 這是往下拿工具,走的是 MCP。然後它發現要換一個零件,於是去找零件供應商的 Agent 問庫存和價格 —— 這是往旁邊找隊友,走的是 A2A。而那個零件供應商,可能就是一套跑了十幾年的庫存系統 —— 只是有人在它外面做了一層轉接、掛上 Agent Card,它就進到 Agent 的世界裡了。庫存系統本身,還是那套十幾年前的東西,一行沒動。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">16</div>
+<h2>授權:卡上寫的是「要哪一種鑰匙」</h2>
+<div class="semoji">🔐</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>沿用既有的 OAuth、OIDC、雙向憑證 —— 接得上你現有的 IAM</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>憑證不走 A2A 的訊息,走 HTTP 標頭,事先另外申請</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>卡可以帶簽章;完整版能力可以驗過身分才給</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>最後講一件企業一定要處理的事:授權。A2A 在這裡的做法,我覺得是它最務實的一個設計:它**沒有自己發明一套認證**。卡上宣告的是「要用哪一種認證方式」—— API 金鑰、OAuth、OpenID Connect、或是雙向憑證,全部是你公司現在就在用的那幾種。而且憑證本身不走 A2A 的訊息,是走 HTTP 標頭,事先另外去申請。換句話說,卡上寫的是「要哪一種鑰匙」,不是鑰匙本身。這對企業是好消息:你現有的身分權限系統接得上,不用為了 A2A 另外養一套。一點零版還多了兩個東西:卡可以帶數位簽章,對方能驗證這張卡真的是你發的、沒被人掉包;另外公開那張卡可以只寫最基本的,對方通過身分驗證之後才拿得到完整版 —— 你不用把全部能力攤在公開網路上。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">17</div>
+<h2>它不解決什麼</h2>
+<div class="semoji">🚫</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>管的是:怎麼發現、怎麼溝通、怎麼驗身分</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>不管:計費、對方掛掉算誰的、稽核紀錄留哪</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>自動連鎖越方便,控管越不能省</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>但我要把邊界講清楚,免得你以為導了就什麼都有了。A2A 管的是「怎麼發現、怎麼溝通、怎麼驗身分」。至於跨公司交辦要怎麼計費、對方掛掉算誰的責任、稽核紀錄留在哪 —— 這些協定沒管,要你自己在合約跟架構上處理。還有一件事:Agent 能自動找 Agent、自動交辦,代表你交辦一次,底下可能自動連鎖跑了好幾層,而每一層都可能碰到真實的系統、真實的資料。所以誰能跟誰對話、能交辦什麼不能交辦什麼,要有人管。自動連鎖越方便,控管越不能省 —— 這兩件事永遠是一起長大的。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">18</div>
+<h2>帶走一句話</h2>
+<div class="semoji">💡</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>企業系統不可能為了 AI 重寫</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>所以不動它,在外面加一層、掛一張 Agent Card</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>卡寫得含糊,對方就用不動你 —— 而且不會報錯</li>
+</ul>
+<div class="note">MCP 開放你的「工具」,A2A 開放你這個「對象」本身 —— 不同層,合起來才完整。</div>
+<details class="script"><summary>逐字稿</summary><p>如果今天你只帶走一句話:企業那套系統不可能為了 AI 重寫,而 A2A 剛好給了一條路 —— 不動它,在外面加一層、掛一張 Agent Card。整件事的成敗,就落在那張卡寫得好不好,因為讀它的是另一個 Agent,你寫得含糊,對方就用不動你,而且它不會報錯給你。如果你手上正好有一套碰不得的老系統,你可以先做一件事:把它「對外能提供什麼能力」列成一張清單,每一項寫清楚什麼情況該用、什麼情況別用。那張清單,就是 Agent Card 的草稿,而且是整件事裡最需要人腦、最不能外包的一步。</p></details>
+</section>
+<footer class="foot">
+完整影片:<a href="https://www.youtube.com/watch?v=CiMTb-9U5p4" target="_blank" rel="noopener">https://www.youtube.com/watch?v=CiMTb-9U5p4</a><br>
+🧱 對應架構圖 · A2A:<a href="arch-a2a.html">arch-a2a.html</a><br>
+🧱 對應架構圖 · Agent Card:<a href="arch-agent-card.html">arch-agent-card.html</a><br>
+📚 <a href="index.html">回課綱總表 →</a><br>
+《AI 實戰筆記:一個人的實戰升級》— 教學用網頁投影片。
+</footer>
+</div>
+<button class="totop" onclick="window.scrollTo(0,0)" aria-label="回到最上面">↑</button>
+<script>addEventListener("scroll",function(){var b=document.querySelector(".totop");if(b)b.classList.toggle("show",scrollY>500)})</script>
+</body>
+</html>
+

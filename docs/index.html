@@ -1,0 +1,260 @@
+<!doctype html>
+<html lang="zh-Hant"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>從問 AI 到用 Agent</title><style>
+*{margin:0;box-sizing:border-box}
+:root{--bg:#f8fafc;--surface:#fff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;--accent:#0ea5e9}
+@media(prefers-color-scheme:dark){:root{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;--text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8}}
+body{background:var(--bg);color:var(--text);line-height:1.7;font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif}
+.wrap{max-width:840px;margin:0 auto;padding:0 20px 80px}
+.hero{padding:72px 0 32px;border-bottom:1px solid var(--line);margin-bottom:8px}
+.eyebrow{font-size:.8rem;letter-spacing:.2em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.hero h1{font-size:clamp(2.2rem,6vw,3.4rem);font-weight:800;margin:.3em 0 .2em;line-height:1.1}
+.hero p{color:var(--muted);font-size:1.15rem;max-width:60ch}
+.mod{margin-top:44px}
+.modhead{display:flex;align-items:baseline;gap:14px;border-bottom:2px solid var(--accent);padding-bottom:8px}
+.modhead h2{font-size:1.5rem;font-weight:800}
+.modcount{font-size:.85rem;color:var(--muted);font-variant-numeric:tabular-nums}
+.lvl{font-size:.78rem;font-weight:800;color:var(--accent);border:1.5px solid var(--accent);border-radius:999px;padding:2px 11px;white-space:nowrap}
+.lvlnote{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px}
+.lvlnote a{text-decoration:none}
+.lvlnote span{display:inline-block;font-size:.82rem;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:4px 12px;cursor:pointer;transition:.15s}
+.lvlnote a:hover span{border-color:var(--accent);color:var(--accent);background:color-mix(in srgb,var(--accent) 8%,transparent)}
+.archjump{display:inline-block;margin-top:16px;padding:9px 18px;border-radius:999px;background:color-mix(in srgb,var(--accent) 14%,transparent);border:1px solid var(--accent);color:var(--accent);font-weight:700;font-size:.92rem;text-decoration:none}
+.archjump:hover{background:var(--accent);color:#04121f}
+.totop{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border-radius:999px;background:var(--accent);color:#04121f;border:none;cursor:pointer;font-size:1.5rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}
+.totop.show{opacity:.92;pointer-events:auto}.totop:hover{opacity:1}
+html{scroll-behavior:smooth}
+.moddesc{color:var(--muted);font-size:.98rem;margin:8px 0 16px}
+.stance{margin:26px 0 22px;padding:20px 22px;border-left:3px solid var(--accent);
+  background:color-mix(in srgb,var(--accent) 6%,transparent);border-radius:0 10px 10px 0;max-width:64ch}
+.stance h2{font-size:1.02rem;margin:0 0 10px;letter-spacing:.02em}
+.stance p{color:var(--muted);font-size:.97rem;margin:0 0 9px;line-height:1.75}
+.stance b{color:var(--text)}
+.stance-punch{color:var(--text)!important;font-weight:700;font-size:1.02rem!important;
+  margin:14px 0 0!important}
+ul.eps{list-style:none;padding:0;display:flex;flex-direction:column;gap:10px}
+li.ep{display:flex;gap:18px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:16px 20px}
+.epnum{font-size:1.4rem;font-weight:800;color:var(--accent);font-variant-numeric:tabular-nums;min-width:2ch}
+.epbody{flex:1}
+.eptitle{font-size:1.08rem;font-weight:700;margin-bottom:5px;text-wrap:balance}
+.eplinks{display:flex;gap:14px;font-size:.92rem}
+.go{color:var(--accent);text-decoration:none;font-weight:600}
+.yt{color:var(--muted);text-decoration:none}
+.soon{color:var(--muted)}
+.foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem}
+.overview-wrap{margin-top:30px}
+.ovh{font-size:1.05rem;color:var(--muted);font-weight:700;margin-bottom:14px}
+.overview{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px}
+.card{display:flex;flex-direction:column;gap:3px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:14px;text-decoration:none;transition:.15s}
+.card:hover{border-color:var(--accent);transform:translateY(-2px);box-shadow:0 6px 18px rgba(15,23,42,.08)}
+.cico{font-size:1.5rem;line-height:1.1}
+.cname{font-weight:800;color:var(--text);font-size:1.02rem}
+.ccount{font-size:.8rem;color:var(--accent);font-weight:700;font-variant-numeric:tabular-nums}
+.cdesc{font-size:.86rem;color:var(--muted);line-height:1.5}
+details.mod{margin-top:16px;border:1px solid var(--line);border-radius:16px;background:var(--surface);padding:0 20px}
+details.mod>summary.modhead{cursor:pointer;list-style:none;padding:18px 0;margin:0;border-bottom:2px solid transparent}
+details.mod[open]>summary.modhead{border-bottom-color:var(--accent)}
+details.mod>summary.modhead::-webkit-details-marker{display:none}
+details.mod>summary.modhead::after{content:"▾";margin-left:auto;color:var(--muted);transition:transform .2s;font-size:.9rem}
+details.mod[open]>summary.modhead::after{transform:rotate(180deg)}
+details.mod .moddesc{padding-top:14px}
+details.mod .eplist,details.mod>.eps{padding-bottom:18px}
+.eplist{margin:4px 0}
+.eplist>summary{cursor:pointer;color:var(--accent);font-weight:600;font-size:.9rem;padding:8px 0;list-style:none}
+.eplist>summary::-webkit-details-marker{display:none}
+.eplist[open]>summary{color:var(--muted)}
+.rmtrack{font-weight:800;color:var(--accent);font-size:.92rem;margin:18px 0 8px;letter-spacing:.02em}
+.rmk{font-size:1.15rem;min-width:1.5em;text-align:center}
+li.ep.todo{opacity:.6}
+li.ep.done .eptitle{font-weight:700}
+#dify .eps{padding-bottom:6px}
+</style></head>
+<body><div class="wrap">
+<header class="hero"><div class="eyebrow">教學影片系列</div>
+<h1>從問 AI 到用 Agent</h1><p>一個人的實戰升級 —— 給每一個想從「問 AI」跨到「用 Agent」的人</p>
+<p style="color:var(--muted);font-size:.95rem;margin-top:10px">不必照順序 —— 依你的難度挑,先把同一級看熟,再往上一級。</p>
+<div class="lvlnote"><a href="#L1"><span>L1 入門 · 沒用過 Agent —— 先搞懂它跟聊天差在哪</span></a><a href="#L2"><span>L2 上手 · 想跑出第一個結果 —— 照著做就會</span></a><a href="#L3"><span>L3 進階 · 用進日常工作 —— 複雜任務、多 Agent、邊界</span></a><a href="#L4"><span>L4 工程 · 要它可靠、可重複、跑得起來</span></a><a href="#L5"><span>L5 企業 · 組織要導入 —— 開放能力、跨系統、治理</span></a><a href="#L6"><span>L6 開創 · 還沒有人知道該做什麼 —— 把需求做出來</span></a></div>
+<p style="color:var(--muted);margin-top:14px;max-width:62ch">
+每一支都能單獨看,想解決什麼問題就點什麼。如果想把「AI 工程」整套觀念
+建立起來,先看下面的<b>工程線</b> —— 那是一條刻意排過、一路念上去的順序。</p>
+<div class="stance">
+<h2>這門課的立場</h2>
+<p><b>批判性思考通常被教成一件內省的事</b> —— 質疑假設、檢視證據、想清楚再說。
+但內省找不到自己的盲點,因為盲點的定義就是你看不見它。</p>
+<p><b>所以這裡教的是把批判外包給現實:</b>
+你不用聰明到想得出對的問題,做個東西讓對方否定它;
+不用有洞察力看出他們沒說的痛,聽他講「不知道」;
+不用預判哪裡改不動,撞上去,牆會告訴你。
+AI 讓這件事可行的原因,是把「被否定」的成本壓到幾乎為零。</p>
+<p><b>而現在最需要被批判的,是 AI 自己給你的東西</b> ——
+它產出的東西流暢、有條理、聽起來就是對的,
+而流暢跟正確,在它身上完全沒有關聯。</p>
+<p class="stance-punch">執行可以交辦,判斷不能外包。</p>
+</div>
+<div><a class="archjump" href="#eng">🔧 工程線 · 一路念上去 ↓</a>
+ <a class="archjump" href="#rag">📚 RAG 六部曲 ↓</a>
+ <a class="archjump" href="#arch">🧱 架構補充 ↓</a></div>
+</header>
+<section class="overview-wrap"><h2 class="ovh">🧭 分軌總覽 · 點卡片展開該軌</h2><div class="overview"><a class="card" href="#dify"><span class="cico">🧩</span>
+  <span class="cname">Dify 自架實戰</span><span class="ccount">3/15 集</span>
+  <span class="cdesc">自架 AI Agent 平台的完整學習路線,一天一個照著玩</span></a><a class="card" href="#aisec"><span class="cico">🛡️</span>
+  <span class="cname">AI 資安風險 · 攻防大戰</span><span class="ccount">13/13 集</span>
+  <span class="cdesc">AI agent 的攻擊面:一個節點一集,講它怎麼發生、你怎麼防</span></a><a class="card" href="#eng"><span class="cico">🔧</span>
+  <span class="cname">工程線</span><span class="ccount">7 集</span>
+  <span class="cdesc">一路念上去:把「AI 工程」整套觀念建立起來</span></a><a class="card" href="#rag"><span class="cico">📚</span>
+  <span class="cname">RAG 六部曲</span><span class="ccount">6 集</span>
+  <span class="cdesc">從做一個 RAG,到工具太多怎麼收</span></a><a class="card" href="#topic"><span class="cico">📘</span>
+  <span class="cname">觀念與基本功</span><span class="ccount">9/9</span>
+  <span class="cdesc"></span></a><a class="card" href="#topic"><span class="cico">📘</span>
+  <span class="cname">Agent 工程模式</span><span class="ccount">3/3</span>
+  <span class="cdesc"></span></a><a class="card" href="#topic"><span class="cico">📘</span>
+  <span class="cname">實作與工作流</span><span class="ccount">4/4</span>
+  <span class="cdesc"></span></a><a class="card" href="#topic"><span class="cico">📘</span>
+  <span class="cname">Context 治理</span><span class="ccount">7/7</span>
+  <span class="cdesc"></span></a><a class="card" href="#topic"><span class="cico">📘</span>
+  <span class="cname">地端 / 硬體</span><span class="ccount">2/2</span>
+  <span class="cdesc"></span></a><a class="card" href="#topic"><span class="cico">📘</span>
+  <span class="cname">企業落地與找痛點</span><span class="ccount">4/4</span>
+  <span class="cdesc"></span></a><a class="card" href="#arch"><span class="cico">🧱</span>
+  <span class="cname">架構補充</span><span class="ccount">19 圖</span>
+  <span class="cdesc">按主題分 6 類,把技術細節畫成架構圖</span></a></div></section>
+<details class="mod" id="dify" open>
+  <summary class="modhead"><h2>🧩 Dify 自架實戰 · 學習路線</h2><span class="modcount">3/15 完成</span></summary>
+  <p class="moddesc">自己架一個 AI Agent 平台的完整學習路線,一天一個、照著玩。跟 L1-L6 分級無關,是一條動手做的獨立線。
+  完成的會變成可點的文章+影片,還沒做的標「規劃中」——十幾天後全打勾,這張表本身就是完整系列目錄。
+  &nbsp;<a class="go" href="dify-guide.html">📖 情境式使用手冊(工具/知識庫/MCP 怎麼配)→</a>
+  &nbsp;<a class="go" href="arch-dify.html">🧱 看完整架構圖 →</a></p>
+  <div class="rmtrack">A · 應用能力(會用)</div><ul class="eps"><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">對話 → Agent + 工具:五道牆與一個假答案</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">RAG / 知識庫:讓 agent 查你自己的文件</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">Workflow vs Chatflow:畫流程 vs 讓它自主</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">變數 / 開場白 / 輸入表單:app 的輸入設計</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">自訂工具 / MCP:把你的系統包成 agent 能用的工具</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=pthcHzzUEM4" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">把 app 開成 MCP server:讓別的 AI 當你的工具用</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=AKqXAvPLaiE" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">企業落地:agent 平台的授權架構(AAD / SSO / 分級 RAG)</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=TMuZqE_gNF8" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul><div class="rmtrack">B · 後端架構(懂原理)</div><ul class="eps"><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">後端架構:本地 GPU 怎麼跟雲端並駕齊驅</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">容器拓撲:worker / sandbox / ssrf_proxy 各司何職</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">模型外掛怎麼運作:plugin_daemon 內部</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li></ul><div class="rmtrack">C · 平台化(給所有人)</div><ul class="eps"><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">成員 / 權限 / 發佈:一人一個可控管平台</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">追蹤 / 監控 / LLMOps:官方版的「看紀錄」</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">對外整合:嵌網站 / API / webhook</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li></ul><div class="rmtrack">D · A2A / 多 agent(進階)</div><ul class="eps"><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">多 agent 協作:把工具換成 agent</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li><li class="ep todo"><span class="rmk">📅</span><div class="epbody"><div class="eptitle">A2A loop 對照 Dify agent loop</div><div class="eplinks"><span class="soon">規劃中</span></div></div></li></ul></details><details class="mod" id="aisec" open>
+  <summary class="modhead"><h2>🛡️ AI 資安風險 · 攻防大戰</h2><span class="modcount">13/13 完成</span></summary>
+  <p class="moddesc">AI agent 也會被攻擊,而且攻擊面你可能沒想過。這條獨立系列一個節點一集,講它<b>怎麼發生</b>、你<b>怎麼防</b>:
+  攻擊面在工具、上下文、模型、輸出、執行這五站的鏈上;而大多數人踩的因,是授權與費用。跟 L1-L6 分級無關,是一條動手防守的獨立線。
+  完成的會變成可點的文章+影片,還沒做的標「規劃中」。
+  &nbsp;<a class="go" href="arch-aisec.html">🧱 看完整攻防架構總攬(對點補足)→</a></p>
+  <div class="rmtrack">總覽</div><ul class="eps"><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">AI 也會被攻擊:五站攻擊面 + 果→因 總覽</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=XXLb97gOqwQ" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul><div class="rmtrack">五站攻擊面(技術的因)</div><ul class="eps"><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">站① 工具下毒:供應鏈毒從最前面進來</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=Sa5tROaFFX4" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle"><a class="go" href="aisec-context-injection.html">站② 上下文注入:指令與資料混戰</a></div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=e5Xn_ssezis" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">站③ 模型被換 / 算力降級算歪</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=d4abcSmJuCQ" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle"><a class="go" href="aisec-bad-output.html">站④ 壞輸出:一個壞輸出三種危害</a></div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=DQLS5pR_gyA" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle"><a class="go" href="aisec-exec-gate.html">站⑤ 執行:引爆點,也是萬用閘</a></div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=SM0QcnvfPYE" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul><div class="rmtrack">使用的因(人為)</div><ul class="eps"><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">Shadow AI:個人帳號 vs 企業帳號</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=tCCnmqMlzFI" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">社交工程:外洩真實流程 = 攻擊者的鑰匙</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=fwsXi6RC1IA" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle"><a class="go" href="aisec-agent-dev-trap.html">Agent 開發的費用 × 暴露陷阱:限縮 / 去敏</a></div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=N0WiHeoME8g" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul><div class="rmtrack">進階與治理</div><ul class="eps"><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">多代理攻擊面 + GPT-5.6 Sol 案例</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=HLpQHD7jjjE" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">地端不是免死金牌 &amp; 個資怎麼漏</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=7Q2EJMQf2pw" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle"><a class="go" href="aisec-governance.html">治理總結:六個控制點 + OWASP Agentic Top 10</a></div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=4eycl19ROAM" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep done"><span class="rmk">✅</span><div class="epbody"><div class="eptitle">收尾:為什麼大家都在買 GPU = 資料永遠在家</div><div class="eplinks"><a class="yt" href="https://www.youtube.com/watch?v=H0iNQ7ZOuLk" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details><details class="mod" id="eng">
+  <summary class="modhead"><h2>🔧 工程線 · 一路念上去</h2><span class="modcount">6 種工程 + 總覽</span></summary>
+  <p class="moddesc">這幾支雖然標在不同難度,但概念上是一條線:先看總覽地圖(🗺),
+  再從 Prompt 一路念到 Graph。想把「AI 工程」整套觀念建立起來,照這個順序走。</p>
+  <details class="eplist"><summary>展開 7 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">🗺</div>
+  <div class="epbody"><div class="eptitle">六種工程,何時用哪一種:prompt、context、loop、workflow、harness、graph 一次分清</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=IJpa0g_39MI" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">Prompt:你對 AI 說的那句話:同一個 AI,你怎麼講,決定它端出什麼</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=WWg3EehX6Bo" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">Context:AI 看得到的一切:不只你那句話 —— 你給的背景,決定它答得準不準</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=U-8VeAavkkQ" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">03</div>
+  <div class="epbody"><div class="eptitle">Loop:讓 AI 自己做到好:你給一個做完的標準,它自己做→檢查→修,直到達標</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=jaB6mwrJGYY" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">04</div>
+  <div class="epbody"><div class="eptitle">Workflow:把步驟寫死,穩穩跑:有些事你不要 AI 自由發揮 —— 你要它每次都一模一樣</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=GSpzoLhDFcQ" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">05</div>
+  <div class="epbody"><div class="eptitle">Harness:讓 AI 動起來的地板:它會想、會做,但要真的動手,得先有一塊站得住的地板</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=4TQUp-pAoPg" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">06</div>
+  <div class="epbody"><div class="eptitle">Graph:一群 AI 怎麼分工:一個 agent 扛不動時,把很多個接成一張分工圖</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=L5VCXCWHcvQ" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><details class="mod" id="rag">
+  <summary class="modhead"><h2>📚 RAG 六部曲 · 一路念上去</h2><span class="modcount">L4 → L6 · 6 集</span></summary>
+  <p class="moddesc">從「怎麼做一個 RAG」一路念到「工具太多怎麼收」:做 → 選模型切塊 → 系統架構 → 包成服務 → 升級 Agentic → MCP 氾濫怎麼管。想把 RAG 從 demo 做成能給整個單位用的系統,照這個順序走。每一集都配了真的 UML/架構圖。</p>
+  <details class="eplist"><summary>展開 6 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">一般 RAG 怎麼做:切塊、算向量、存、查、生成 —— 一條龍最小可跑</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=t8IFq2sMkSs" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">選模型 + 怎麼切:RAG 的品質天花板,就卡在這一步</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=wKr9SV3L5gM" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">03</div>
+  <div class="epbody"><div class="eptitle">一套 RAG 的系統架構:BUILD 一次、SERVE 無數次,授權跟向量解耦</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=M73GiFs_jQA" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">04</div>
+  <div class="epbody"><div class="eptitle">變成最小服務 + 包成 MCP:對外只開一個 rag_search,工具越少 agent 越準</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=lHgNX44ATVo" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">05</div>
+  <div class="epbody"><div class="eptitle">一般 RAG 跟 Agentic RAG 差在哪:只差一顆會迭代的腦,斷網也能自己跑</div>
+  <div class="eplinks"><a class="go" href="agentic-rag.html">投影片 →</a> <a class="yt" href="https://www.youtube.com/watch?v=c5KAFYc36Nk" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">06</div>
+  <div class="epbody"><div class="eptitle">工具太多,agent 反而變笨:MCP 氾濫怎麼收:少工具、動態發現、閘道</div>
+  <div class="eplinks"><span class="soon">投影片準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=dYbUO1XNOsE" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><section class="mod" style="padding-bottom:0">
+  <div class="modhead" id="topic" style="scroll-margin-top:16px">
+    <h2>主題式 · 依難度挑</h2><span class="modcount">現行版本</span></div>
+  <p class="moddesc">不用照順序。挑你現在正卡住的那個題目點進去,
+  每一支都從頭把該講的講完,不預設你看過別支。</p></section><details class="mod" id="">
+  <summary class="modhead"><h2>觀念與基本功</h2><span class="modcount">9/9 上線</span></summary>
+  <p class="moddesc"></p>
+  <details class="eplist"><summary>展開 9 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">從問 AI 到用 Agent:「聊天」和「交辦」差在哪</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=m9y8Xewt-Hs" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">我免費 GPT 就夠了:那我為什麼還需要 Agent?</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=6yc-I21C3YY" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">03</div>
+  <div class="epbody"><div class="eptitle">Agent 的三個構成:目標、工具、迭代 —— 拆解它憑什麼叫 Agent</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=H421BpZUhmE" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">04</div>
+  <div class="epbody"><div class="eptitle">要花多少錢、怎麼開始:成本邏輯、訂閱 vs API、小錢就能試</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=xitCFSFt7FY" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">05</div>
+  <div class="epbody"><div class="eptitle">從零跑出你的第一個結果:選工具、開通、挑任務,實錄一次</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=9GhGDaxkGlY" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">06</div>
+  <div class="epbody"><div class="eptitle">把話講清楚:目標 + 脈絡 + 驗收,交辦成功的三塊</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=FMSo_EUGKUU" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">07</div>
+  <div class="epbody"><div class="eptitle">做壞了怎麼救:它為什麼有時做對、有時做爛</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=bGJI8BbJE1s" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">08</div>
+  <div class="epbody"><div class="eptitle">讓 Agent 動手:讀檔、查資料、操作系統</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=dZQuVWD9_Fw" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">09</div>
+  <div class="epbody"><div class="eptitle">什麼該交給、什麼不該:邊界、風險與成本的護欄</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=xAxJW27Ju9s" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><details class="mod" id="">
+  <summary class="modhead"><h2>Agent 工程模式</h2><span class="modcount">3/3 上線</span></summary>
+  <p class="moddesc"></p>
+  <details class="eplist"><summary>展開 3 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">一次派很多個:你怎麼指揮多個 Agent 分工、平行跑</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=IQPot9UU3YQ" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">Agent 的記憶:為什麼它會忘,以及怎麼讓它記住</div>
+  <div class="eplinks"><a class="go" href="agent-memory.html">投影片 →</a> <a class="yt" href="https://www.youtube.com/watch?v=5jWifu0YYcg" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">03</div>
+  <div class="epbody"><div class="eptitle">怎麼知道 Agent 做得夠好:評估與回歸測試,把「感覺對」變「有證據對」</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=v6XRiXNd0vc" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><details class="mod" id="">
+  <summary class="modhead"><h2>實作與工作流</h2><span class="modcount">4/4 上線</span></summary>
+  <p class="moddesc"></p>
+  <details class="eplist"><summary>展開 4 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">我實際怎麼用 Agent 處理真實工作:最真的例子就是你正在看的這一切</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=c_eNKFkY3zQ" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">打造你自己的 Agent 工作流:把全部串起來,一套你能複製的起手式</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=kf1GNCahvxM" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">03</div>
+  <div class="epbody"><div class="eptitle">別只是 vibe:從 vibe coding 到 vibe engineering</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=HYNfGudMvfo" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">04</div>
+  <div class="epbody"><div class="eptitle">技能封裝:把做對一次的流程,變成可重複用的資產</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=cHavu4FUzII" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><details class="mod" id="">
+  <summary class="modhead"><h2>Context 治理</h2><span class="modcount">7/7 上線</span></summary>
+  <p class="moddesc"></p>
+  <details class="eplist"><summary>展開 7 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">MCP 入門:讓 Agent 安全插上你的工具與資料</div>
+  <div class="eplinks"><a class="go" href="mcp-basics.html">投影片 →</a> <a class="yt" href="https://www.youtube.com/watch?v=Xwf3o_fo7vY" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">架一台 MCP Server:把你自己的能力,開放給 Agent 用</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=8GVzOHYJrSw" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">03</div>
+  <div class="epbody"><div class="eptitle">系統不能重寫,所以掛一張卡:A2A 與 Agent Card 怎麼運作</div>
+  <div class="eplinks"><a class="go" href="a2a-agent-card.html">投影片 →</a> <a class="yt" href="https://www.youtube.com/watch?v=CiMTb-9U5p4" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">04</div>
+  <div class="epbody"><div class="eptitle">我讓 Agent 自己跑完一張採購單:A2A 實戰:16 步、一步一停、逼它真去查價</div>
+  <div class="eplinks"><a class="go" href="a2a-procurement.html">投影片 →</a> <a class="yt" href="https://www.youtube.com/watch?v=xpxm3kTgRHE" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">05</div>
+  <div class="epbody"><div class="eptitle">把 SAP 變成 MCP:沒權限也能練,一個下午自寫 OData 總成軸</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=h2zNGg9vy-c" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">06</div>
+  <div class="epbody"><div class="eptitle">原來 MCP 不用存資料:把閘道當導向器,而不是資料倉儲</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=AxJLkaiHdMA" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">07</div>
+  <div class="epbody"><div class="eptitle">A2A、MCP、Hub 怎麼選:同一個 Agent 問資料,四個檔位的取捨</div>
+  <div class="eplinks"><a class="go" href="a2a-mcp-hub.html">投影片 →</a> <a class="yt" href="https://www.youtube.com/watch?v=uqUenTyfrS8" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><details class="mod" id="">
+  <summary class="modhead"><h2>地端 / 硬體</h2><span class="modcount">2/2 上線</span></summary>
+  <p class="moddesc"></p>
+  <details class="eplist"><summary>展開 2 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">雲端 vs 地端:為什麼有人堅持自己買機器</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=baJPLt0fZj8" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">地端硬體怎麼看:VRAM、頻寬,以及 GPU 為什麼不夠用</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=nwPROiXr-LM" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><details class="mod" id="">
+  <summary class="modhead"><h2>企業落地與找痛點</h2><span class="modcount">4/4 上線</span></summary>
+  <p class="moddesc"></p>
+  <details class="eplist"><summary>展開 4 項 ▾</summary><ul class="eps"><li class="ep"><div class="epnum">01</div>
+  <div class="epbody"><div class="eptitle">痛有七種:先認出是哪一種,才知道要用哪一招</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=Jc2y200hWv4" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">02</div>
+  <div class="epbody"><div class="eptitle">需求還不存在的時候:用做得出來的東西,把它挖出來</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=GCYr5-qtZJU" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">03</div>
+  <div class="epbody"><div class="eptitle">做出來被說不對,才是正常的:沒有「探完了」這回事</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=I7hp957TyUk" target="_blank" rel="noopener">▶ 影片</a></div></div></li><li class="ep"><div class="epnum">04</div>
+  <div class="epbody"><div class="eptitle">企業用 Agent:為什麼完全不同,以及資安治理的幾個角度</div>
+  <div class="eplinks"><span class="soon">準備中</span> <a class="yt" href="https://www.youtube.com/watch?v=O49L7fd9Kpk" target="_blank" rel="noopener">▶ 影片</a></div></div></li></ul></details></details><details class="mod" id="arch">
+  <summary class="modhead"><h2>🧱 架構補充</h2><span class="modcount">技術架構圖 · 19 張 · 7 類</span></summary>
+  <p class="moddesc">按主題分類。把技術細節畫成圖,搭配動手/進階集服用。</p>
+  <div class="rmtrack">🧭 一張圖看懂(總覽)</div><ul class="eps"><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">AI 其實就是一直打 API:三顆旋鈕</div><div class="eplinks"><a class="go" href="arch-api-mental-model.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">送什麼(Context/RAG/GraphRAG)× 打哪顆(文字/多模態)× 怎麼接(Response tool tag);MCP/AgentCard=說明書進 Context 這一格</div></div></li></ul><div class="rmtrack">🧩 Dify 自架實戰</div><ul class="eps"><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">Dify 完整架構:自架平台的所有零件</div><div class="eplinks"><a class="go" href="arch-dify.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">13 容器組件全圖 + 一次對話的生命週期 + RAG 流程 + 每個容器職責表</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">Dify RAG 雙庫實戰架構</div><div class="eplinks"><a class="go" href="arch-dify-rag.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">雙庫圖(Postgres 文字 + Weaviate 向量,可換 pgvector)+ 對話流程三階段 +『上下文』命脈 + 組成表</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">Dify 自訂工具 / MCP 架構</div><div class="eplinks"><a class="go" href="arch-dify-custom-tools.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">能力邊界圖 + OpenAPI 四件事 + 三方驗證鐵律 + 接真系統的坑(SSRF/token/幻覺)+ Agent vs Chatflow 安全對照</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">把 Dify app 開成 MCP server 架構</div><div class="eplinks"><a class="go" href="arch-dify-mcp-server.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">提供方架構 + 外掛法(這版沒原生按鈕)+ 端點四欄位 + Agent 開不了 + 跨機器閉環 + MCP 協定版本(停在最舊 2024-11-05)</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">企業授權架構(AAD / SSO / 分級 RAG)</div><div class="eplinks"><a class="go" href="arch-dify-enterprise-auth.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">門在外能力在後 + authN/authZ + 身分只能從 Entra 發 + 同一個 n8n 接人與機器 + 授權集中 PEP/PDP + 分級 RAG 分庫 + MCP 在外 API 在內</div></div></li></ul><div class="rmtrack">📚 RAG 知識庫</div><ul class="eps"><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">一套 RAG 系統長怎樣</div><div class="eplinks"><a class="go" href="arch-rag.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">全景圖:建索引 → 向量庫 → 提問 → 有據答案;含 agentic 控制器 + MCP;對應 RAG 六部曲</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">RAG vs 微調:怎麼選</div><div class="eplinks"><a class="go" href="arch-finetune-rag.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">Pipeline:資料→FT/RAG→公司模型→地端部署→資產化</div></div></li></ul><div class="rmtrack">🔌 對外整合:MCP / A2A</div><ul class="eps"><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">架一台 MCP Server</div><div class="eplinks"><a class="go" href="arch-mcp-server.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">三層結構:Agent → 能力宣告 → 你的系統;架設四步驟</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">A2A:把系統開成 Agent 服務</div><div class="eplinks"><a class="go" href="arch-a2a.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">UI→API→Agent Card 演進;卡 / API / 隔離層 / 既有系統穩定性</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">Agent Card:既有系統变身成 Agent</div><div class="eplinks"><a class="go" href="arch-agent-card.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">Agent ↔ Card ↔ 系統(含資料庫)關係 + 授權關卡設計</div></div></li></ul><div class="rmtrack">⚙️ Agent 底層機制</div><ul class="eps"><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">LLM Tool Use 完整拆解</div><div class="eplinks"><a class="go" href="arch-tool-use.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">時序圖:一次帶工具的四步往返 + 真 payload + OpenAI/Anthropic 對照</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">Harness:讓模型變可信 Agent 的那層</div><div class="eplinks"><a class="go" href="arch-harness.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">五層定位 + hook 生命週期 + 工具攔截改寫(廚房的水電)</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">Skill:把流程固化成資產</div><div class="eplinks"><a class="go" href="arch-skill.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">script + template 封裝;封裝前審核;個人經驗變團隊資產</div></div></li></ul><div class="rmtrack">🧭 選型與方法論</div><ul class="eps"><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">選對模型:副手選型框架</div><div class="eplinks"><a class="go" href="arch-model-selection.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">決策樹:一個模型過五道成績單關卡</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">找痛的方法論</div><div class="eplinks"><a class="go" href="arch-find-the-pain.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">七種痛的判斷樹 + 沒有出口的迭代迴圈 + 該長在哪(核心/例外/負擔)</div></div></li></ul><div class="rmtrack">🖥️ 地端 / 硬體實戰</div><ul class="eps"><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">本地換腦:接進你的 agent</div><div class="eplinks"><a class="go" href="arch-local-brain.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">紅路撞牆 vs 綠路跑通:選對 agent 比選對模型重要</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">GPU 為什麼不夠:產出 vs 使用</div><div class="eplinks"><a class="go" href="arch-gpu-produce-vs-use.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">兩個時代對照:訓練用完就還 vs 使用把 GPU 永久佔住</div></div></li><li class="ep"><div class="epnum">🧩</div><div class="epbody"><div class="eptitle">地端的隱形陷阱:換硬體就算錯</div><div class="eplinks"><a class="go" href="arch-hardware-debug.html">看架構圖 →</a></div><div style="color:var(--muted);font-size:.9rem;margin-top:2px">診斷樹:二分法找臨界層 → 根因 → 解法</div></div></li></ul></details>
+<footer class="foot">每一支都有網頁版投影片 + 完整逐字稿,影片在 YouTube。想到哪看哪,或照「工程線」一路念上去。</footer>
+</div>
+<button class="totop" onclick="window.scrollTo(0,0)" aria-label="回到最上面">↑</button>
+<script>addEventListener('scroll',function(){var b=document.querySelector('.totop');if(b)b.classList.toggle('show',scrollY>500)})</script>
+<script>
+function openTarget(){var h=location.hash;if(!h)return;var el=document.querySelector(h);if(el&&el.tagName==='DETAILS'){el.open=true;el.scrollIntoView({behavior:'smooth',block:'start'});}}
+addEventListener('hashchange',openTarget);addEventListener('load',openTarget);
+document.querySelectorAll('.card,.archjump').forEach(function(c){c.addEventListener('click',function(){setTimeout(openTarget,0);});});
+</script>
+</body></html>

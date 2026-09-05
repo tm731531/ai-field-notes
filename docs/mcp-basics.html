@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP 入門:讓 Agent 安全插上你的工具與資料</title>
+<style>*{margin:0;box-sizing:border-box}body{margin:0}.totop{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border-radius:999px;background:var(--accent,#0ea5e9);color:#04121f;border:none;cursor:pointer;font-size:1.5rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}.totop.show{opacity:.92;pointer-events:auto}html{scroll-behavior:smooth}</style>
+</head>
+<body>
+
+<style>
+  .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;
+        --accent:#0ea5e9;--eyebrow:#64748b;
+        max-width:920px;margin:0 auto;padding:0 20px 80px;
+        font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+        color:var(--text);line-height:1.7;}
+  @media (prefers-color-scheme:dark){.deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}}
+  :root[data-theme="dark"] .deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}
+  :root[data-theme="light"] .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;
+        --text:#0f172a;--muted:#64748b;--accent:#0ea5e9;--eyebrow:#64748b;}
+  .deck{background:var(--bg);}
+  body{background:var(--bg,#0b1120);}
+  .hero{padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:48px;}
+  .eyebrow{font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--eyebrow);font-weight:600;}
+  .hero h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:.4em 0 .3em;text-wrap:balance;font-weight:800;}
+  .lead{color:var(--muted);font-size:1.15rem;max-width:60ch;}
+  .badges{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 8px;align-items:center;}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
+        background:var(--surface);border:1px solid var(--line);font-size:.9rem;color:var(--muted);}
+  .yt{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;
+        background:var(--accent);color:#04121f;font-weight:700;text-decoration:none;font-size:.95rem;}
+  .yt:hover{filter:brightness(1.08);}
+  .slide{background:var(--surface);border:1px solid var(--line);border-radius:18px;
+        padding:32px 32px 8px;margin:22px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .shead{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;}
+  .snum{flex:0 0 auto;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+        font-weight:800;color:#04121f;font-size:1.1rem;}
+  .semoji{font-size:2rem;line-height:1;margin-left:auto;}
+  .shead h2{font-size:1.5rem;font-weight:800;margin:6px 0;line-height:1.25;text-wrap:balance;}
+  ul.cards{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:12px;}
+  ul.cards li{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:12px;
+        background:color-mix(in srgb,var(--accent) 7%,transparent);border-left:4px solid var(--accent);
+        font-size:1.05rem;}
+  ul.cards li .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+        font-size:.85rem;font-weight:700;color:#04121f;}
+  details.script{margin:4px 0 20px;border-top:1px dashed var(--line);padding-top:12px;}
+  details.script summary{cursor:pointer;color:var(--muted);font-size:.9rem;font-weight:600;
+        letter-spacing:.03em;list-style:none;}
+  details.script summary::before{content:"▸ ";}
+  details.script[open] summary::before{content:"▾ ";}
+  details.script p{color:var(--muted);margin:12px 0 4px;font-size:1rem;}
+  .note{display:inline-block;margin:0 0 20px;padding:8px 16px;border-radius:10px;
+        background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);
+        font-weight:600;font-size:.95rem;}
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;}
+  .foot a{color:var(--accent);}
+</style>
+
+<div class="deck">
+<header class="hero">
+<div class="eyebrow">AI 實戰筆記 · Context 治理</div>
+<h1>MCP 入門</h1>
+<p class="lead">讓 Agent 安全插上你的工具與資料</p>
+<div class="badges">
+<a class="yt" href="https://www.youtube.com/watch?v=Xwf3o_fo7vY" target="_blank" rel="noopener">▶ 看影片</a>
+<span class="pill" style="border-color:var(--accent);color:var(--accent);font-weight:700">🎓 Context 治理</span>
+<span class="pill">🎬 13 個段落</span>
+<span class="pill">🀄 投影片 + 逐字稿</span>
+</div>
+<details class="script" open><summary>本集開場</summary><p>讓 Agent 動手用工具 —— 查資料、開檔案、呼叫外部系統 —— 這件事你可能已經在做了。但用久了會發現一件很煩的事——每接一個新工具、新系統,就得為它客製一次接法。接下來,我要介紹一個把這件事標準化的東西,它的名字叫 MCP。</p></details>
+</header>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">1</div>
+<h2>先看看「接工具」現在的麻煩</h2>
+<div class="semoji">🧩</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>接 GitHub 一套接法</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>接資料庫又是另一套</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>接公司系統再客製第三套</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>先把問題講清楚。你想讓 Agent 接上 GitHub,得寫一段對接的程式;想再接資料庫,又是另外一套寫法;想接公司內部的系統,再客製第三套。每接一個,都要有人去寫一段中間的「膠水」,把 Agent 和那個工具黏起來。而且這些膠水彼此不通用,換一個工具,幾乎等於從頭來過一次。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">2</div>
+<h2>更煩的是,換一邊就全部重來</h2>
+<div class="semoji">🔁</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>換一個 Agent 平台</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>之前接好的工具又要重接</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>力氣一次又一次白花</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>更麻煩的還在後面。假設你辛苦把十個工具都接到某個 Agent 上了,哪天你想換一個更好的 Agent 平台,這十套接法很可能沒辦法直接搬,又得重接一輪。工具那邊沒改、Agent 那邊也沒改,只是中間的接法沒有共通標準,力氣就這樣一次又一次地白花。這就是還沒有標準時的世界。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">3</div>
+<h2>MCP:一個「通用接頭」的標準</h2>
+<div class="semoji">🔌</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>一個開放標準,不綁單一廠商</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>比喻:AI 的 USB-C</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>一種接法,大家通用</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>MCP 要解決的,就是這件事。它是一個開放的標準,不綁任何單一廠商,專門定義「Agent 和工具之間該怎麼對接」。最好懂的比喻,是把它想成「AI 的 USB-C」。以前每個裝置一種插頭,亂七八糟;USB-C 出來之後,一個接頭到處都能插。MCP 想在 AI 世界做的,就是這件一樣的事情。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">4</div>
+<h2>它的全名與來歷</h2>
+<div class="semoji">📖</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>全名 MCP:模型上下文協定</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>Anthropic 在 2024 年提出並開源</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>2025 年底捐給 LF,不再由單一公司掌握</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>講一下它的正式身分。MCP 的全名是 Model Context Protocol,直翻是「模型上下文協定」。它是 Anthropic,也就是做 Claude 的那家公司,在 2024 年提出、而且開源出來的一套標準。但我要補一個很多人不知道、而且很關鍵的後續:**2025 年底,它已經被捐給 Linux Foundation 底下的基金會了。**為什麼這件事重要?因為一個標準最怕的就是「這是某一家的東西,哪天他們不玩了怎麼辦」。捐出去之後,它的治理不再由單一公司說了算 —— 對你個人可能沒差,但如果你要說服公司採用,**這一句是最有力的那一句**。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">5</div>
+<h2>怎麼運作(一):工具那邊掛一個 server</h2>
+<div class="semoji">📡</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>工具端架一個 MCP server</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>server 對外「宣告」自己能提供什麼</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>可呼叫的工具、可讀的資料、可用的提示</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>接著用白話講它怎麼運作。第一步,在工具那一邊,架一個叫做 MCP server 的東西。這個 server 的工作,是對外「宣告」自己能提供什麼:有哪些可以呼叫的動作、有哪些可以讀取的資料、還有哪些現成可用的提示範本。等於它主動把「我這邊能做什麼」寫成一份標準的清單,掛在門口讓人看。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">6</div>
+<h2>怎麼運作(二):Agent 照標準來問、來用</h2>
+<div class="semoji">🤝</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>Agent 這邊當 client(使用方)</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>照同一套協定去問 server</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>不用為每個工具重寫接法</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>第二步,Agent 這一邊當 client,也就是使用方。它照著 MCP 這套共同的協定,去問 server:你有哪些工具?因為兩邊講的是同一種「語言」,Agent 就不必為每個工具量身訂做接法。只要對方掛的是 MCP server、你的 Agent 又支援 MCP,插上去就能溝通,中間那層膠水就省下來了。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">7</div>
+<h2>好處一:接一次,到處通用</h2>
+<div class="semoji">♻️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>工具做成 MCP server 一次</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>任何支援 MCP 的 Agent 都能用</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>換 Agent、換工具都不用重接</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>這樣帶來的第一個好處,是「接一次,到處通用」。工具那邊只要做成一個 MCP server,之後不管換到哪個 Agent,只要它支援 MCP,都能用同一套方式接上去。反過來也一樣:你換了 Agent 平台,原本那些 server 完全不用改,新的 Agent 直接就能接。每次都要重接的痛,就消失了。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">8</div>
+<h2>好處二:現成一堆 server 撿來用</h2>
+<div class="semoji">🌐</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>已經有很多別人做好的 MCP server</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>接檔案、資料庫、雲端硬碟、各種線上服務</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>掛上去就能用,不用自己造</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>第二個好處是生態。因為它是公開標準,現在已經有一大堆別人做好的 MCP server 可以直接撿來用:接本機檔案的、接資料庫的、接雲端硬碟的、接各種線上服務的,種類越來越多。你想讓 Agent 多一個能力,很多時候不用自己從頭寫,找到對應的 server 掛上去,馬上就能用,省掉非常多功夫。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">9</div>
+<h2>公司場景:安全接進既有系統的介面</h2>
+<div class="semoji">🛡️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>公司既有系統靠 MCP server 對接</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>在 server 這層決定 Agent 能碰什麼</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>權限邊界劃在你自己手上</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>這裡順帶提一個公司場景。在公司裡,你會希望把 Agent 接進既有的系統,但又不能讓它亂碰。MCP 剛好也是這件事的好介面:你可以在 server 這一層,決定這個 Agent 能看到哪些工具、能讀哪些資料、哪些完全不開放。等於權限的邊界,是劃在你自己手上的,而不是把公司系統整個攤開給 Agent。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">10</div>
+<h2>一個務實提醒:掛 server 等於開放能力</h2>
+<div class="semoji">⚠️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>掛一個 server = 把某些能力交出去</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>掛哪些、給多少權限,要先想清楚</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>公司環境尤其要謹慎</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>不過也要給你一個務實的提醒。掛上一個 MCP server,本質上就是把某一批能力開放給 Agent 使用。方便的另一面是:如果亂掛、權限開太大,Agent 能碰的東西就超出你的預期了。所以「要掛哪些 server、每一個給到多少權限」這件事,一定要先想清楚,在公司這種環境裡尤其要謹慎,不要圖方便全部打開。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">11</div>
+<h2>撿現成的 server 之前,先想一下</h2>
+<div class="semoji">📦</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>它是在你的電腦上跑,用的是你的權限</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>跟裝一個來路不明的程式,是同一件事</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>先看是誰做的、要什麼權限</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>剛剛說有一大堆現成的 server 可以撿來用,這很棒,但我要在這裡放一個提醒,因為這是最容易被跳過、後果又最大的一步。你從網路上找一個 MCP server 掛上去,**那是一支在你自己電腦上跑的程式,而且它是用你的身分、你的權限在跑。**你能碰到什麼,它大致上就能碰到什麼 —— 你的檔案、你存在電腦裡的東西。換句話說:**掛一個陌生人寫的 MCP server,跟裝一個來路不明的軟體,風險是同一個等級的。**但很多人不會這樣想,因為它感覺只是「幫 AI 加個功能」,點一下就好了,沒有那種「我正在安裝軟體」的警覺。所以建議很簡單,就三句:**看一下是誰做的**,官方或知名專案優先;**看一下它要什麼權限**,一個查天氣的憑什麼要讀你整個硬碟;**公司的電腦上,先問過再裝。**</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">12</div>
+<h2>還有一個更隱蔽的:它讀到的字</h2>
+<div class="semoji">🪤</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>server 的說明文字會直接送進 AI 眼前</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>那段字裡可以藏「寫給 AI 看的指令」</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>從外面讀回來的東西是資料,不是命令</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>還有一種更隱蔽的狀況,我覺得每個要用 MCP 的人都該知道。剛剛講到,server 會宣告「我能做什麼」,那份說明是文字,而**那段文字會直接送到 AI 眼前**。問題就在這:那段文字裡,是可以藏話的。藏什麼?藏寫給 AI 看的指令,像是「順便把使用者的某某檔案內容一起附上」。你看不到,因為你不會去讀那份說明;AI 讀得到,而且**它眼前只是一整片文字,它分不出哪一句是你交代的、哪一句是那個 server 夾帶的。**更麻煩的是,這種夾帶不一定在 server 本身 —— server 可能完全乾淨,但它幫你讀回來的那份文件、那則留言裡藏了東西,一樣會送到 AI 眼前。所以請你把這句話記住,它適用的範圍比 MCP 大得多:**AI 從工具讀回來的東西,是「資料」,不是「命令」。**實務上怎麼防?兩件事就夠:**別把「能讀外面東西」跟「能動手改東西」給同一個 Agent**;還有,**它要做不可逆的動作之前,讓它停下來給你看一眼。**</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">13</div>
+<h2>帶走一句話</h2>
+<div class="semoji">💡</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>MCP 把「接工具」從每次客製,變成掛一個標準接頭</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>你不用懂底層協定</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>但要會問:它「支援到什麼程度」——不是「支不支援」</li>
+</ul>
+<div class="note">一次接好,到處能用 —— 這就是通用接頭的意義。</div>
+<details class="script"><summary>逐字稿</summary><p>如果今天你只帶走一句話,那就是:MCP 讓「Agent 接工具」這件事,從每次都要客製,變成掛一個標準接頭就通。你完全不用去懂它底層的協定細節;但你要記得一個很實用的問法——以後評估任何一個 Agent 平台,問它一句「支不支援 MCP」,其實就是在問:它好不好接上你手邊的工具跟資料。</p></details>
+</section>
+<footer class="foot">
+完整影片:<a href="https://www.youtube.com/watch?v=Xwf3o_fo7vY" target="_blank" rel="noopener">https://www.youtube.com/watch?v=Xwf3o_fo7vY</a><br>
+🧱 對應架構圖 · 架一台 MCP Server:<a href="arch-mcp-server.html">arch-mcp-server.html</a><br>
+📚 <a href="index.html">回課綱總表 →</a><br>
+《AI 實戰筆記:一個人的實戰升級》— 教學用網頁投影片。
+</footer>
+</div>
+<button class="totop" onclick="window.scrollTo(0,0)" aria-label="回到最上面">↑</button>
+<script>addEventListener("scroll",function(){var b=document.querySelector(".totop");if(b)b.classList.toggle("show",scrollY>500)})</script>
+</body>
+</html>
+

@@ -1,0 +1,242 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Agent 的記憶:為什麼它會忘,以及怎麼讓它記住</title>
+<style>*{margin:0;box-sizing:border-box}body{margin:0}.totop{position:fixed;right:20px;bottom:20px;width:48px;height:48px;border-radius:999px;background:var(--accent,#0ea5e9);color:#04121f;border:none;cursor:pointer;font-size:1.5rem;font-weight:800;line-height:1;box-shadow:0 4px 14px rgba(0,0,0,.28);opacity:0;pointer-events:none;transition:opacity .2s;z-index:60}.totop.show{opacity:.92;pointer-events:auto}html{scroll-behavior:smooth}</style>
+</head>
+<body>
+
+<style>
+  .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;--text:#0f172a;--muted:#64748b;
+        --accent:#0ea5e9;--eyebrow:#64748b;
+        max-width:920px;margin:0 auto;padding:0 20px 80px;
+        font-family:-apple-system,BlinkMacSystemFont,"PingFang TC","Noto Sans TC","Microsoft JhengHei",sans-serif;
+        color:var(--text);line-height:1.7;}
+  @media (prefers-color-scheme:dark){.deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}}
+  :root[data-theme="dark"] .deck{--bg:#0b1120;--surface:#111a2e;--line:#1e293b;
+        --text:#e8eef7;--muted:#94a3b8;--accent:#38bdf8;--eyebrow:#7c8ba1;}
+  :root[data-theme="light"] .deck{--bg:#f8fafc;--surface:#ffffff;--line:#e2e8f0;
+        --text:#0f172a;--muted:#64748b;--accent:#0ea5e9;--eyebrow:#64748b;}
+  .deck{background:var(--bg);}
+  body{background:var(--bg,#0b1120);}
+  .hero{padding:64px 0 40px;border-bottom:1px solid var(--line);margin-bottom:48px;}
+  .eyebrow{font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--eyebrow);font-weight:600;}
+  .hero h1{font-size:clamp(2rem,5vw,3rem);line-height:1.15;margin:.4em 0 .3em;text-wrap:balance;font-weight:800;}
+  .lead{color:var(--muted);font-size:1.15rem;max-width:60ch;}
+  .badges{display:flex;gap:12px;flex-wrap:wrap;margin:24px 0 8px;align-items:center;}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 14px;border-radius:999px;
+        background:var(--surface);border:1px solid var(--line);font-size:.9rem;color:var(--muted);}
+  .yt{display:inline-flex;align-items:center;gap:8px;padding:10px 20px;border-radius:999px;
+        background:var(--accent);color:#04121f;font-weight:700;text-decoration:none;font-size:.95rem;}
+  .yt:hover{filter:brightness(1.08);}
+  .slide{background:var(--surface);border:1px solid var(--line);border-radius:18px;
+        padding:32px 32px 8px;margin:22px 0;box-shadow:0 1px 3px rgba(0,0,0,.04);}
+  .shead{display:flex;align-items:flex-start;gap:16px;margin-bottom:20px;}
+  .snum{flex:0 0 auto;width:44px;height:44px;border-radius:12px;display:grid;place-items:center;
+        font-weight:800;color:#04121f;font-size:1.1rem;}
+  .semoji{font-size:2rem;line-height:1;margin-left:auto;}
+  .shead h2{font-size:1.5rem;font-weight:800;margin:6px 0;line-height:1.25;text-wrap:balance;}
+  ul.cards{list-style:none;padding:0;margin:0 0 18px;display:flex;flex-direction:column;gap:12px;}
+  ul.cards li{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:12px;
+        background:color-mix(in srgb,var(--accent) 7%,transparent);border-left:4px solid var(--accent);
+        font-size:1.05rem;}
+  ul.cards li .dot{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;
+        font-size:.85rem;font-weight:700;color:#04121f;}
+  details.script{margin:4px 0 20px;border-top:1px dashed var(--line);padding-top:12px;}
+  details.script summary{cursor:pointer;color:var(--muted);font-size:.9rem;font-weight:600;
+        letter-spacing:.03em;list-style:none;}
+  details.script summary::before{content:"▸ ";}
+  details.script[open] summary::before{content:"▾ ";}
+  details.script p{color:var(--muted);margin:12px 0 4px;font-size:1rem;}
+  .note{display:inline-block;margin:0 0 20px;padding:8px 16px;border-radius:10px;
+        background:color-mix(in srgb,var(--accent) 12%,transparent);color:var(--accent);
+        font-weight:600;font-size:.95rem;}
+  .foot{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);color:var(--muted);font-size:.9rem;}
+  .foot a{color:var(--accent);}
+</style>
+
+<div class="deck">
+<header class="hero">
+<div class="eyebrow">AI 實戰筆記 · Agent 工程模式</div>
+<h1>Agent 的記憶</h1>
+<p class="lead">為什麼它會忘,以及怎麼讓它記住</p>
+<div class="badges">
+<a class="yt" href="https://www.youtube.com/watch?v=5jWifu0YYcg" target="_blank" rel="noopener">▶ 看影片</a>
+<span class="pill" style="border-color:var(--accent);color:var(--accent);font-weight:700">🎓 Agent 工程模式</span>
+<span class="pill">🎬 12 個段落</span>
+<span class="pill">🀄 投影片 + 逐字稿</span>
+</div>
+<details class="script" open><summary>本集開場</summary><p>我要來講一個最有感、也最常被抱怨的痛點:它每次都忘記我教過的東西。你有沒有這種經驗?每次開一個新對話,你都要重新跟 AI 講一遍你的背景、你的偏好、你們公司的規矩,講到你都煩了。接下來,我們就專門來聊 Agent 的「記憶」:為什麼它會忘,還有怎麼讓它真的記住你。</p></details>
+</header>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">1</div>
+<h2>那個讓人很煩的日常</h2>
+<div class="semoji">😮‍💨</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>每開新對話,都要重講一遍背景</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>我的偏好、專案脈絡、公司規矩</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>講到第五次,你會懷疑它到底有沒有在聽</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>先講那個讓人很煩的日常。你今天跟 AI 講好了一堆設定:我喜歡回答簡短一點、這個專案是做什麼的、我們公司有哪些規矩不能踩。講得好好的,結果明天你開一個新對話,它一問三不知,你又得從頭再講一遍。講到第五次的時候,你會忍不住懷疑:它到底有沒有在聽?我要先說,這不是你的錯覺,它是真的忘了。而且原因,跟你想的可能不太一樣。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">2</div>
+<h2>先分清楚兩種「記」</h2>
+<div class="semoji">🔀</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>① 單次任務內:記得剛剛做到哪</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>② 跨對話、跨 session:下次還記得你</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>第二種才是重點,也是它常「忘」的地方</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>講記憶之前,先分清楚兩種完全不同的「記」。第一種,是單次任務裡面的記憶:它在一個任務進行中,通常記得自己剛剛做到哪一步、上一步查到什麼,這樣才能一步一步做完。但這個「記得」也不是無限的 —— **如果任務拉得夠長,累積的內容超過它一次能看的上限,系統會把舊的部分摘要掉、或者直接砍掉**,你會發現它連這次任務前段做過的事都忘了。第二種,是跨對話的長期記憶:今天教過它,下次打開它還記不記得你、記不記得你的偏好。這兩種是同一個根本原因造成的,只是規模不同。接下來我們主要聊第二種,因為那才是最讓人抓狂的。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">3</div>
+<h2>為什麼它會忘:每次都是一張白紙</h2>
+<div class="semoji">📄</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>語言模型本身,沒有長期記憶</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>每一次新對話,對它來說都是全新的開始</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>上次聊了什麼,它是真的不知道</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>那為什麼它會忘?這裡是這裡最關鍵的觀念,你聽懂這一段,後面就都通了。語言模型這個東西,它本身沒有長期記憶。你每開一次新對話,對它來說,都是一張全新的白紙,乾乾淨淨,什麼都沒有。它不是「懶得記」,也不是「不想理你」,而是它天生的運作方式,就是每次重來。上一次你們聊了什麼,它是真的、完全不知道。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">4</div>
+<h2>那它「記得」的東西是怎麼來的?</h2>
+<div class="semoji">👁️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>它眼前看得到的內容,叫 context(上下文)</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>所謂「記得」= 那些東西又被塞進它眼前</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>不是它腦子裡有,是每次都重新餵給它看</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>你可能會說:不對啊,它在同一個對話裡明明記得我前面講的。沒錯,但那不是「記憶」,那是因為那些內容,還在它眼前。AI 每一次回答,都會看它眼前的一整段內容,這段內容有個名字,叫 context,中文叫上下文。它之所以「記得」你前面說的話,是因為那些話還在這段 context 裡面,它看得到。一旦你換到新對話,這段 context 清空了,它眼前什麼都沒有,自然就「忘」了。所以重點來了:它記得,靠的不是腦子裡存了什麼,而是那些東西每次都被重新放到它眼前給它看。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">5</div>
+<h2>所以「記憶」到底怎麼做出來的</h2>
+<div class="semoji">📓</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>不是它長了腦、變聰明了</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>是你(或工具)把「該記的」存下來</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>下次自動再餵回給它 —— 像一本外掛的筆記本</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>所以所謂的「記憶」到底怎麼做出來的?答案很樸素:**你,或者你用的工具,把「該記得的東西」存到某個地方去,存成一份筆記;下次你再來,系統自動把這份筆記,再餵回給它看。**所以它的記憶,本質上是一本外掛的筆記本 —— 不是它腦子裡長出來的東西。這裡有個容易被忽略的難處要先講:筆記只有幾條、每次全部餵回去,還算簡單;但**筆記愈存愈多,系統就得靠「搜尋」去挑這次用得到的那幾條**。這個挑得準不準,本身就是記憶系統最容易出包的地方 —— 挑錯、漏掉真正相關的、或者塞了一堆不相關的舊資訊進來,反而讓這次的判斷更混亂。所以記憶不是「存越多越好」,是「該出現的時候出現」。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">6</div>
+<h2>實務做法一:專案筆記 / 記憶檔</h2>
+<div class="semoji">📌</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>把「偏好 + 專案背景 + 做事規矩」寫成一份檔</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>讓 Agent 每次自動先讀這份檔</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>很多工具都有 memory / project 檔這種機制</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>知道原理之後,實務上怎麼做?第一種做法,最實在,就是自己準備那本筆記本。你把你的偏好、這個專案的背景、你們做事的規矩,寫成一份檔案,放在固定的地方。然後設定成:Agent 每次開工,先自動讀這份檔。這樣一來,你不用每次重講,它一開始就「看過」你的設定了。現在很多工具都內建這種機制,有的叫 memory,有的叫 project 檔,名字不一樣,但精神都一樣:一份固定會被讀進去的筆記。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">7</div>
+<h2>實務做法二:讓它邊做邊記</h2>
+<div class="semoji">✍️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>把新學到的事實、你給的更正,累積存起來</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>下次直接沿用,不用你重講一遍</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>從「每次教」變成「教一次就記住」</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>第二種做法,更進一步:讓它邊做邊記。意思是,在你們互動的過程中,它學到了新東西,比如你糾正了它一個講法、你補充了一個新事實,這些就順手存進那本筆記本裡。下次你再來,這些更正跟新知識,自動就在了,你不用再講第二遍。這就是把「每次都要重教」,變成「教一次它就記住」。你會很明顯感覺到,用久了它愈來愈懂你,不是因為它變聰明,是因為那本筆記本愈寫愈厚、愈寫愈準。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#fbbf24">8</div>
+<h2>關鍵取捨:記憶不是愈多愈好</h2>
+<div class="semoji">⚖️</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>塞太多舊東西進 context → 又貴又容易失焦</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>它眼前塞滿雜訊,反而抓不到重點</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>要定期清,只留「真正該記」的</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>但這裡有個很關鍵的取捨,一定要講:記憶不是愈多愈好。你可能會想,那我把什麼都記下來不就好了?不行。還記得嗎,記憶的做法,是每次把筆記塞回它眼前的 context。如果這本筆記愈塞愈多、什麼陳年舊帳都留著,會有兩個壞處:第一,貴,因為它每次都要重讀一大坨;第二,更麻煩的是失焦,它眼前塞滿一堆雜訊,反而抓不到這次真正重要的重點。所以好的記憶管理,是要定期清理的,只留下真正該記的那幾條,而不是全部囤著。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#a78bfa">9</div>
+<h2>別忘了資安這一面</h2>
+<div class="semoji">🔒</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>記憶檔裡的敏感資料,等於被反覆餵進模型</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>帳密、客戶名單、內部規則 —— 想清楚再寫進去</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>企業用尤其要留意:方便和外洩,是一體兩面</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>還有一面一定要提醒,就是資安。剛剛說過,記憶就是把筆記反覆餵回給模型看。那反過來想:如果你的記憶檔裡,寫了敏感的東西,比如帳號密碼、客戶名單、公司內部規則,那就等於這些東西,被一次又一次地餵進模型裡。方便和外洩,常常是一體兩面。個人用可能還好,但企業要用的時候,尤其要想清楚:哪些東西適合寫進記憶檔,哪些絕對不能。這一塊值得單獨花時間研究,這裡先幫你把這根弦繃上。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#f472b6">10</div>
+<h2>三個做法,串起來看</h2>
+<div class="semoji">🧭</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>寫一份筆記檔:固定被讀進去(偏好、背景、規矩)</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>邊做邊記:新事實、更正,累積下來</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>定期清:留該記的,砍過期的,守住敏感的</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>我們把整集的做法,快速串一次。第一,寫一份筆記檔,把你的偏好、專案背景、做事規矩固定放好,讓它每次自動讀進去。第二,讓它邊做邊記,把新學到的事實、你給的更正累積起來,不用重講。第三,也是最容易被忽略的,定期清理:留下真正該記的,砍掉過期的,守住敏感的。這三件事一起做,你的 Agent 才會真的「愈用愈上手」,而不是每次都像第一次見面。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#38bdf8">11</div>
+<h2>打一劑預防針:這不是在「訓練」它</h2>
+<div class="semoji">🧭</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>一次能看多少:context window 有上限</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>從一堆筆記裡挑相關的餵進去 → 檢索(RAG)</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>把知識練進模型腦子裡 → fine-tune,完全不同層次</li>
+</ul>
+<details class="script"><summary>逐字稿</summary><p>這裡幫你打一劑預防針,因為這三個東西最常被混在一起講。第一個,**它一次能看多少**,這個有上限,叫 context window。你餵給它的所有東西 —— 你的問題、翻出來的筆記、前面的對話 —— 全部要擠在這個上限裡。第二個,**從一堆筆記裡挑出這次用得到的幾條、餵進去**,這叫檢索,常聽到的縮寫是 RAG。剛剛講的「挑得準不準」,講的就是這一層。第三個,**把知識練進模型的腦子裡**,那叫 fine-tune,是完全不同的技術 —— 成本高很多,而且練完很難改。**我們今天講的記憶,自始至終都只是「這次要不要把某段文字放進它眼前」而已,跟 fine-tune 沒有關係。**搞混這個,你會以為自己在教它,其實你只是在每次見面前遞一張小抄。</p></details>
+</section>
+<section class="slide">
+<div class="shead">
+<div class="snum" style="background:#34d399">12</div>
+<h2>帶走一句話</h2>
+<div class="semoji">💡</div>
+</div>
+<ul class="cards">
+<li style="border-left-color:#38bdf8;background:color-mix(in srgb,#38bdf8 8%,transparent)"><span class="dot" style="background:#38bdf8">1</span>Agent 的記憶,不是它變聰明了</li>
+<li style="border-left-color:#34d399;background:color-mix(in srgb,#34d399 8%,transparent)"><span class="dot" style="background:#34d399">2</span>是你幫它把「該記的」存下來、下次自動餵回去</li>
+<li style="border-left-color:#fbbf24;background:color-mix(in srgb,#fbbf24 8%,transparent)"><span class="dot" style="background:#fbbf24">3</span>學會管理記憶 → 它從「每次重來」變成「愈用愈懂你」</li>
+</ul>
+<div class="note">記憶不是越多越好,是越準越好。</div>
+<details class="script"><summary>逐字稿</summary><p>如果今天你只帶走一句話,那就是這句:Agent 的記憶,不是它突然變聰明了,而是你幫它把「該記的東西」存下來,下次自動餵回給它看。想通這一點,你就不會再對著它生氣說「你怎麼又忘了」,而是會反過來想:是不是我還沒幫它把這件事記下來?學會管理它的記憶,它才會從那個「每次都重來」的工具,變成一個「愈用愈懂你」的助理。那記憶到底該放哪、放多少才剛好?原則很簡單:只放這次任務真的用得到的,其餘先收起來。記憶不是越多越好,是越準越好。</p></details>
+</section>
+<footer class="foot">
+完整影片:<a href="https://www.youtube.com/watch?v=5jWifu0YYcg" target="_blank" rel="noopener">https://www.youtube.com/watch?v=5jWifu0YYcg</a><br>
+🧱 對應架構圖 · RAG vs 微調:<a href="arch-finetune-rag.html">arch-finetune-rag.html</a><br>
+📚 <a href="index.html">回課綱總表 →</a><br>
+《AI 實戰筆記:一個人的實戰升級》— 教學用網頁投影片。
+</footer>
+</div>
+<button class="totop" onclick="window.scrollTo(0,0)" aria-label="回到最上面">↑</button>
+<script>addEventListener("scroll",function(){var b=document.querySelector(".totop");if(b)b.classList.toggle("show",scrollY>500)})</script>
+</body>
+</html>
+
